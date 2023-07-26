@@ -3,6 +3,30 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:ride_sharing/main.dart';
 
+void showStyledToast(
+    String message, Color backgroundColor, BuildContext context) {
+  FToast fToast = FToast();
+  fToast.init(context);
+
+  Widget toast = Container(
+    padding: EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
+    decoration: BoxDecoration(
+      borderRadius: BorderRadius.circular(8.0),
+      color: backgroundColor,
+    ),
+    child: Text(
+      message,
+      style: TextStyle(color: Colors.white, fontSize: 16.0),
+    ),
+  );
+
+  fToast.showToast(
+    child: toast,
+    gravity: ToastGravity.BOTTOM,
+    toastDuration: Duration(seconds: 2),
+  );
+}
+
 class signUp_Screen extends StatefulWidget {
   @override
   State<signUp_Screen> createState() => signUp_ScreenState();
@@ -108,9 +132,7 @@ class signUp_ScreenState extends State<signUp_Screen> {
                                         const Color.fromARGB(255, 0, 14, 36)),
                               )),
                         )),
-                    SizedBox(
-                      height: 40.0,
-                    ),
+                    SizedBox(height: 40.0),
                     Padding(
                         padding: EdgeInsets.only(left: 20.0, right: 20.0),
                         child: TextField(
@@ -177,54 +199,57 @@ class signUp_ScreenState extends State<signUp_Screen> {
                         )),
                     SizedBox(height: 40.0),
                     ElevatedButton(
-                        onPressed: () {
-                          if (userNameCtrl.text.isEmpty) {
-                            Fluttertoast.showToast(
-                                msg: 'Username shold not be empty...');
-                          }
-                          if (!userEmailCtrl.text.contains('@')) {
-                            Fluttertoast.showToast(msg: 'Email is not valid');
-                          }
-                          if (!(userPhoneCtrl.text.length == 11)) {
-                            Fluttertoast.showToast(
-                                msg: 'Phone number is not valid');
-                          }
-                          if (userPasswrdCtrl1.text.length < 6 ||
-                              userPasswrdCtrl2.text.length < 6) {
-                            Fluttertoast.showToast(
-                                msg:
-                                    'Password or Confirm Password must be greter then 6 character...');
-                          } else if (!(userPasswrdCtrl1.text ==
-                              userPasswrdCtrl2.text)) {
-                            Fluttertoast.showToast(
-                                msg: 'Password Should not be Mached');
-                          } else {
-                            getRegistration(context);
-                            userNameCtrl.clear();
-                            userEmailCtrl.clear();
-                            userPhoneCtrl.clear();
-                            userPasswrdCtrl1.clear();
-                            userPasswrdCtrl2.clear();
-                            Fluttertoast.showToast(
-                                msg: 'Successfuly Signup.....');
-                          }
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.blue.shade900,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(21.0),
+                      onPressed: () {
+                        if (userNameCtrl.text.isEmpty) {
+                          showStyledToast('Username should not be empty...',
+                              Colors.red, context);
+                        } else if (!userEmailCtrl.text.contains('@')) {
+                          showStyledToast(
+                              'Email is not valid', Colors.red, context);
+                        } else if (!(userPhoneCtrl.text.length == 11)) {
+                          showStyledToast(
+                              'Phone number is not valid', Colors.red, context);
+                        } else if (userPasswrdCtrl1.text.length < 6 ||
+                            userPasswrdCtrl2.text.length < 6) {
+                          showStyledToast(
+                              'Password or Confirm Password must be greater than 6 characters...',
+                              Colors.red,
+                              context);
+                        } else if (userPasswrdCtrl1.text !=
+                            userPasswrdCtrl2.text) {
+                          showStyledToast(
+                              'Passwords do not match', Colors.red, context);
+                        } else {
+                          getRegistration(context);
+                          userNameCtrl.clear();
+                          userEmailCtrl.clear();
+                          userPhoneCtrl.clear();
+                          userPasswrdCtrl1.clear();
+                          userPasswrdCtrl2.clear();
+                          showStyledToast('Successfully Signed Up.....',
+                              Colors.green, context);
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blue.shade900,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(21.0),
+                        ),
+                      ),
+                      child: Padding(
+                        padding: EdgeInsets.only(
+                            top: 4.0, bottom: 4.0, left: 8.0, right: 8.0),
+                        child: Text(
+                          'SignUp',
+                          style: TextStyle(
+                            fontSize: 30.0,
+                            color: Colors.white,
+                            letterSpacing: 3.0,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
-                        child: Padding(
-                          padding: EdgeInsets.only(
-                              top: 4.0, bottom: 4.0, left: 8.0, right: 8.0),
-                          child: Text('SignUp',
-                              style: TextStyle(
-                                  fontSize: 30.0,
-                                  color: Colors.white,
-                                  letterSpacing: 3.0,
-                                  fontWeight: FontWeight.bold)),
-                        )),
+                      ),
+                    ),
                   ],
                 ),
               ),
