@@ -1,8 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:ride_sharing/rideSignup.dart';
 import 'package:ride_sharing/riderLogin.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
+import 'package:firebase_database/firebase_database.dart';
 
-void main() {
+final databaseReference = FirebaseDatabase.instance.ref();
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   runApp(MyApp());
 }
 
@@ -13,7 +22,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Flutter Demo',
       theme: ThemeData(primarySwatch: Colors.blue),
-      home: login_Screen(),
+      home: signUp_Screen(),
     );
   }
 }
