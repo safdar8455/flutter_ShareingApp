@@ -221,13 +221,6 @@ class signUp_ScreenState extends State<signUp_Screen> {
                               'Passwords do not match', Colors.red, context);
                         } else {
                           getRegistration(context);
-                          userNameCtrl.clear();
-                          userEmailCtrl.clear();
-                          userPhoneCtrl.clear();
-                          userPasswrdCtrl1.clear();
-                          userPasswrdCtrl2.clear();
-                          showStyledToast('Successfully Signed Up.....',
-                              Colors.green, context);
                         }
                       },
                       style: ElevatedButton.styleFrom(
@@ -261,14 +254,56 @@ class signUp_ScreenState extends State<signUp_Screen> {
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
 
   void getRegistration(BuildContext context) async {
-    _firebaseAuth.createUserWithEmailAndPassword(
+    String userName = userNameCtrl.text.trim();
+    String userEmail = userEmailCtrl.text.trim();
+    String userPhone = userPhoneCtrl.text.trim();
+    try {
+      UserCredential userCredential =
+      await _firebaseAuth.createUserWithEmailAndPassword(
         email: userEmailCtrl.text.toString(),
-        password: userPasswrdCtrl1.text.toString());
-    Map userData = {
-      'name': userNameCtrl.text.trim(),
-      'email': userEmailCtrl.text.trim(),
-      'phone': userPhoneCtrl.text.trim(),
-    };
-    databaseReference.child('clintData').set(userData);
+        password: userPasswrdCtrl1.text.toString(),
+      );
+
+      User? user = userCredential.user;
+      if (user != null) {
+        Map userData = {
+          'name': userName,
+          'email': userEmail,
+          'phone': userPhone,
+        };
+        final uid = user.uid;
+        await databaseReference.child(uid).set(userData);
+        showStyledToast('Registration successful!', Colors.blue.shade900, context);
+        // Data saved successfully in the database.
+
+        // Clear the text fields after successful registration.
+        userNameCtrl.clear();
+        userEmailCtrl.clear();
+        userPhoneCtrl.clear();
+        userPasswrdCtrl1.clear();
+        userPasswrdCtrl2.clear();
+
+        // Optionally show a success message to the user using a Flutter toast or dialog.
+
+      } else {
+        // Handle the case where the user is null after registration.
+        showStyledToast('Registration failed. Please try again.', Colors.red, context);
+      }
+    } catch (e) {
+      // Handle and display the error that occurred during registration or database update.
+      String errorMessage = e.toString();
+      print(errorMessage);
+      // Display an error message using a Flutter toast or a dialog.
+      showStyledToast(errorMessage, Colors.red, context);
+      // showDialog(...);
+
+      // Clear the text fields in case of an error during registration.
+      userNameCtrl.clear();
+      userEmailCtrl.clear();
+      userPhoneCtrl.clear();
+      userPasswrdCtrl1.clear();
+      userPasswrdCtrl2.clear();
+    }
   }
+
 }
