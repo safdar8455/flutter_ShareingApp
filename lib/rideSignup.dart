@@ -2,30 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:ride_sharing/main.dart';
-
-void showStyledToast(
-    String message, Color backgroundColor, BuildContext context) {
-  FToast fToast = FToast();
-  fToast.init(context);
-
-  Widget toast = Container(
-    padding: EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
-    decoration: BoxDecoration(
-      borderRadius: BorderRadius.circular(8.0),
-      color: backgroundColor,
-    ),
-    child: Text(
-      message,
-      style: TextStyle(color: Colors.white, fontSize: 16.0),
-    ),
-  );
-
-  fToast.showToast(
-    child: toast,
-    gravity: ToastGravity.BOTTOM,
-    toastDuration: Duration(seconds: 2),
-  );
-}
+import 'package:ride_sharing/riderLogin.dart';
 
 class signUp_Screen extends StatefulWidget {
   @override
@@ -197,7 +174,7 @@ class signUp_ScreenState extends State<signUp_Screen> {
                                         const Color.fromARGB(255, 0, 14, 36)),
                               )),
                         )),
-                    SizedBox(height: 40.0),
+                    SizedBox(height: 20.0),
                     ElevatedButton(
                       onPressed: () {
                         if (userNameCtrl.text.isEmpty) {
@@ -243,6 +220,21 @@ class signUp_ScreenState extends State<signUp_Screen> {
                         ),
                       ),
                     ),
+                    SizedBox(height: 20.0),
+                    InkWell(
+                        onTap: () {
+                          Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => login_Screen()));
+                        },
+                        child: Text(
+                          'Already Signup',
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Colors.blue.shade900,
+                          ),
+                        )),
                   ],
                 ),
               ),
@@ -259,12 +251,12 @@ class signUp_ScreenState extends State<signUp_Screen> {
     String userPhone = userPhoneCtrl.text.trim();
     try {
       UserCredential userCredential =
-      await _firebaseAuth.createUserWithEmailAndPassword(
+          await _firebaseAuth.createUserWithEmailAndPassword(
         email: userEmailCtrl.text.toString(),
         password: userPasswrdCtrl1.text.toString(),
       );
 
-      User? user = userCredential.user;
+      User? user = _firebaseAuth.currentUser;
       if (user != null) {
         Map userData = {
           'name': userName,
@@ -273,7 +265,8 @@ class signUp_ScreenState extends State<signUp_Screen> {
         };
         final uid = user.uid;
         await databaseReference.child(uid).set(userData);
-        showStyledToast('Registration successful!', Colors.blue.shade900, context);
+        showStyledToast(
+            'Registration successful!', Colors.blue.shade900, context);
         // Data saved successfully in the database.
 
         // Clear the text fields after successful registration.
@@ -284,10 +277,10 @@ class signUp_ScreenState extends State<signUp_Screen> {
         userPasswrdCtrl2.clear();
 
         // Optionally show a success message to the user using a Flutter toast or dialog.
-
       } else {
         // Handle the case where the user is null after registration.
-        showStyledToast('Registration failed. Please try again.', Colors.red, context);
+        showStyledToast(
+            'Registration failed. Please try again.', Colors.red, context);
       }
     } catch (e) {
       // Handle and display the error that occurred during registration or database update.
@@ -305,5 +298,4 @@ class signUp_ScreenState extends State<signUp_Screen> {
       userPasswrdCtrl2.clear();
     }
   }
-
 }
