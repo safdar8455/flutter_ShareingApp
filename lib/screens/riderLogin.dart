@@ -1,9 +1,11 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
-import 'package:ride_sharing/homePage.dart';
 import 'package:ride_sharing/main.dart';
-import 'package:ride_sharing/rideSignup.dart';
+import 'package:ride_sharing/screens/homePage.dart';
+import 'package:ride_sharing/screens/rideSignup.dart';
+import 'package:ride_sharing/widget/progressBar.dart';
+import 'package:ride_sharing/widget/showTost.dart';
 
 class login_Screen extends StatefulWidget {
   @override
@@ -14,6 +16,11 @@ class login_ScreenState extends State<login_Screen> {
   TextEditingController userEmailCtrl = TextEditingController();
   TextEditingController userPassCtrl = TextEditingController();
   bool _isPasswordVisible = false;
+
+  void navigateToHomeScreen() {
+    Navigator.pushReplacement(
+        context, MaterialPageRoute(builder: (context) => home_Screen()));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -151,14 +158,15 @@ class login_ScreenState extends State<login_Screen> {
         final DatabaseEvent event = await databaseReference.child(uid).once();
         var userData = event.snapshot.value;
         if (userData != null) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) => home_Screen(),
-            ),
+          await showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return ProgressBar(
+                  icon: Icon(Icons.access_time_filled),
+                  onCompleted: navigateToHomeScreen);
+            },
           );
         } else {
-          _firebaseAuth.signOut();
           showStyledToast('Details not found....', Colors.red, context);
         }
       } else {

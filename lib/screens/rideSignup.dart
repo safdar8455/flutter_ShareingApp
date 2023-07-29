@@ -1,8 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:ride_sharing/main.dart';
-import 'package:ride_sharing/riderLogin.dart';
+import 'package:ride_sharing/screens/riderLogin.dart';
+import 'package:ride_sharing/widget/showTost.dart';
 
 class signUp_Screen extends StatefulWidget {
   @override
