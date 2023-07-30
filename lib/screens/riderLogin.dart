@@ -124,10 +124,21 @@ class login_ScreenState extends State<login_Screen> {
                   SizedBox(height: 20.0),
                   InkWell(
                       onTap: () {
-                        Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => signUp_Screen()));
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return ProgressBar(
+                              icon: Icon(Icons.access_time_filled),
+                              onCompleted: () {
+                                Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => signUp_Screen()),
+                                );
+                              },
+                            );
+                          },
+                        );
                       },
                       child: Text(
                         'Create new account',

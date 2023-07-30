@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:ride_sharing/main.dart';
 import 'package:ride_sharing/screens/riderLogin.dart';
+import 'package:ride_sharing/widget/progressBar.dart';
 import 'package:ride_sharing/widget/showTost.dart';
 
 class signUp_Screen extends StatefulWidget {
@@ -223,10 +224,21 @@ class signUp_ScreenState extends State<signUp_Screen> {
                     SizedBox(height: 20.0),
                     InkWell(
                         onTap: () {
-                          Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => login_Screen()));
+                          showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return ProgressBar(
+                                icon: Icon(Icons.access_time_filled),
+                                onCompleted: () {
+                                  Navigator.pushReplacement(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => login_Screen()),
+                                  );
+                                },
+                              );
+                            },
+                          );
                         },
                         child: Text(
                           'Already Signup',
@@ -275,6 +287,8 @@ class signUp_ScreenState extends State<signUp_Screen> {
         userPhoneCtrl.clear();
         userPasswrdCtrl1.clear();
         userPasswrdCtrl2.clear();
+        Navigator.pushReplacement(
+            context, MaterialPageRoute(builder: (context) => login_Screen()));
 
         // Optionally show a success message to the user using a Flutter toast or dialog.
       } else {
