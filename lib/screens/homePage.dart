@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:provider/provider.dart';
+import 'package:ride_sharing/Handler/appData.dart';
 import 'package:ride_sharing/locationScreens/method_request.dart';
 import 'package:ride_sharing/widget/custom_drawer.dart';
 
@@ -20,26 +22,14 @@ class home_ScreenState extends State<home_Screen> {
 
   void getCurrentLocation() async {
     Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high);
+      desiredAccuracy: LocationAccuracy.high,
+    );
     currentPosition = position;
     LatLng lang = LatLng(position.latitude, position.longitude);
     CameraPosition cameraPosition = CameraPosition(target: lang, zoom: 14.4746);
     userMap!.animateCamera(CameraUpdate.newCameraPosition(cameraPosition));
-    String address = await MethodRequest.methodRequestCoordinated(position);
-    print(address);
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text('Current Address'),
-        content: Text(address),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text('Close'),
-          ),
-        ],
-      ),
-    );
+    String address = await MethodRequest.methodRequestCoordinated(
+        context, position); // Pass the context parameter
   }
 
   void checkLocationPermission() async {
@@ -58,7 +48,7 @@ class home_ScreenState extends State<home_Screen> {
   }
 
   static const CameraPosition _kGooglePlex = CameraPosition(
-    target: LatLng(37.42796133580664, -122.085749655962),
+    target: LatLng(24.8546842, 67.0207055),
     zoom: 14.4746,
   );
 
@@ -178,23 +168,28 @@ class home_ScreenState extends State<home_Screen> {
                         SizedBox(
                           width: 12.0,
                         ),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              "Add Home",
-                            ),
-                            SizedBox(
-                              height: 4.0,
-                            ),
-                            Text(
-                              "Add Your Home Location",
-                              style: TextStyle(
-                                  color: Colors.grey,
-                                  fontSize: 16.0,
-                                  fontWeight: FontWeight.bold),
-                            ),
-                          ],
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            
+                            children: [
+                              Text(
+                                Provider.of<AppData>(context).rAddress?.pName ??
+                                    "Add Home",
+                                overflow: TextOverflow.clip,
+                              ),
+                              SizedBox(
+                                height: 4.0,
+                              ),
+                              Text(
+                                "Add Your Home Location",
+                                style: TextStyle(
+                                    color: Colors.grey,
+                                    fontSize: 16.0,
+                                    fontWeight: FontWeight.bold),
+                              ),
+                            ],
+                          ),
                         )
                       ],
                     ),

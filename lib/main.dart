@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:provider/provider.dart';
+import 'package:ride_sharing/Handler/appData.dart';
 import 'package:ride_sharing/screens/homePage.dart';
 import 'package:ride_sharing/screens/riderLogin.dart';
 import 'firebase_options.dart';
@@ -18,11 +20,14 @@ void main() async {
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Flutter Demo',
-      theme: ThemeData(primarySwatch: Colors.blue),
-      home: login_Screen(),
+    return ChangeNotifierProvider(
+      create: (context) => AppData(),
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        title: 'Flutter Demo',
+        theme: ThemeData(primarySwatch: Colors.blue),
+        home: login_Screen(),
+      ),
     );
   }
 }
