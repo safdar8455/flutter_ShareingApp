@@ -1,12 +1,17 @@
 import 'dart:convert';
-
+import 'package:connectivity/connectivity.dart';
 import 'package:http/http.dart' as http;
 
 class RequestAddress {
   static Future<Map<String, dynamic>> getRequest(String url) async {
-    Uri uri = Uri.parse(url); // Convert the url string to a Uri object
-    http.Response response = await http.get(uri); // Use the Uri object here
     try {
+      var connectivityResult = await Connectivity().checkConnectivity();
+      if (connectivityResult == ConnectivityResult.none) {
+        throw Exception('No internet connection');
+      }
+
+      Uri uri = Uri.parse(url);
+      http.Response response = await http.get(uri);
       if (response.statusCode == 200) {
         String jData = response.body;
         return jsonDecode(jData);
