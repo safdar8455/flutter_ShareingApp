@@ -6,7 +6,10 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:ride_sharing/Handler/appData.dart';
 import 'package:ride_sharing/locationScreens/method_request.dart';
+import 'package:ride_sharing/locationScreens/request_location.dart';
+import 'package:ride_sharing/screens/search_Screen.dart';
 import 'package:ride_sharing/widget/custom_drawer.dart';
+import 'package:flutter/services.dart';
 
 class home_Screen extends StatefulWidget {
   @override
@@ -20,6 +23,13 @@ class home_ScreenState extends State<home_Screen> {
   Position? currentPosition;
   var geolocator = Geolocator();
 
+  @override
+  void initState() {
+    super.initState();
+    checkLocationPermission();
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+  }
+
   void getCurrentLocation() async {
     Position position = await Geolocator.getCurrentPosition(
       desiredAccuracy: LocationAccuracy.high,
@@ -27,15 +37,21 @@ class home_ScreenState extends State<home_Screen> {
     currentPosition = position;
     LatLng lang = LatLng(position.latitude, position.longitude);
     CameraPosition cameraPosition = CameraPosition(target: lang, zoom: 14.4746);
-    userMap!.animateCamera(CameraUpdate.newCameraPosition(cameraPosition));
-    String address = await MethodRequest.methodRequestCoordinated(
-        context, position); // Pass the context parameter
+
+    if (userMap != null) {
+      userMap!.animateCamera(CameraUpdate.newCameraPosition(cameraPosition));
+    }
+
+    String address =
+        await MethodRequest.methodRequestCoordinated(context, position);
+    print(address); // You can print the address here
   }
 
   void checkLocationPermission() async {
     var status = await Permission.location.request();
     if (status.isGranted) {
-      getCurrentLocation();
+      // Initialize the map after the permission is granted
+      _initializeMap();
     } else if (status.isDenied) {
       // The user denied access to the location
       // You can show a dialog or a snackbar to inform the user
@@ -45,6 +61,14 @@ class home_ScreenState extends State<home_Screen> {
       // You can show a dialog with instructions on how to grant permissions from settings
       print('Location permissions permanently denied');
     }
+  }
+
+  void _initializeMap() {
+    setState(() {
+      // Initialize the map here
+    });
+    // Call getCurrentLocation after the map is initialized
+    getCurrentLocation();
   }
 
   static const CameraPosition _kGooglePlex = CameraPosition(
@@ -79,8 +103,8 @@ class home_ScreenState extends State<home_Screen> {
                   onMapCreated: (GoogleMapController controller) {
                     _newGoolgeController.complete(controller);
                     userMap = controller;
-                    setState(() {});
                     checkLocationPermission();
+                    setState(() {});
                   },
                 ),
               )),
@@ -124,35 +148,44 @@ class home_ScreenState extends State<home_Screen> {
                     SizedBox(
                       height: 20.0,
                     ),
-                    Container(
-                      decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(5.0),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black54,
-                              blurRadius: 6.0,
-                              spreadRadius: 0.5,
-                              offset: Offset(0.7, 0.7),
-                            ),
-                          ]),
-                      child: Padding(
-                        padding: const EdgeInsets.all(12.0),
-                        child: Row(
-                          children: [
-                            Icon(
-                              Icons.search,
-                              color: Colors.blue,
-                            ),
-                            SizedBox(
-                              width: 16.0,
-                            ),
-                            Text(
-                              "Search Drop Off",
-                              style: TextStyle(
-                                  fontSize: 15.0, color: Colors.black),
-                            ),
-                          ],
+                    InkWell(
+                      onTap: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => SearchScreen(),
+                            ));
+                      },
+                      child: Container(
+                        decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(5.0),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black54,
+                                blurRadius: 6.0,
+                                spreadRadius: 0.5,
+                                offset: Offset(0.7, 0.7),
+                              ),
+                            ]),
+                        child: Padding(
+                          padding: const EdgeInsets.all(12.0),
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.search,
+                                color: Colors.blue,
+                              ),
+                              SizedBox(
+                                width: 16.0,
+                              ),
+                              Text(
+                                "Search Drop Off",
+                                style: TextStyle(
+                                    fontSize: 15.0, color: Colors.black),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
@@ -171,7 +204,6 @@ class home_ScreenState extends State<home_Screen> {
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
-                            
                             children: [
                               Text(
                                 Provider.of<AppData>(context).rAddress?.pName ??
