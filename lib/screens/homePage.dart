@@ -6,8 +6,8 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:ride_sharing/Handler/appData.dart';
 import 'package:ride_sharing/locationScreens/method_request.dart';
-import 'package:ride_sharing/locationScreens/request_location.dart';
 import 'package:ride_sharing/screens/search_Screen.dart';
+import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:ride_sharing/widget/custom_drawer.dart';
 import 'package:flutter/services.dart';
 
@@ -22,6 +22,8 @@ class home_ScreenState extends State<home_Screen> {
   GoogleMapController? userMap;
   Position? currentPosition;
   var geolocator = Geolocator();
+  List<LatLng> pLineCoordinates = [];
+  Set<Polyline> polyLineSet = {};
 
   @override
   void initState() {
@@ -71,6 +73,20 @@ class home_ScreenState extends State<home_Screen> {
     getCurrentLocation();
   }
 
+  void _navigateToSearchScreen() async {
+    var res = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => SearchScreen(),
+      ),
+    );
+
+    // Check if the result is not null and it's of type DirectionPlace
+    if (res == "sucessfull") {
+      await getPlaceDirection();
+    }
+  }
+
   static const CameraPosition _kGooglePlex = CameraPosition(
     target: LatLng(24.8546842, 67.0207055),
     zoom: 14.4746,
@@ -97,6 +113,7 @@ class home_ScreenState extends State<home_Screen> {
                   initialCameraPosition: _kGooglePlex,
                   mapType: MapType.normal,
                   zoomControlsEnabled: true,
+                  polylines: polyLineSet,
                   zoomGesturesEnabled: true,
                   myLocationButtonEnabled: true,
                   myLocationEnabled: true,
@@ -149,13 +166,7 @@ class home_ScreenState extends State<home_Screen> {
                       height: 20.0,
                     ),
                     InkWell(
-                      onTap: () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => SearchScreen(),
-                            ));
-                      },
+                      onTap: _navigateToSearchScreen,
                       child: Container(
                         decoration: BoxDecoration(
                             color: Colors.white,
@@ -268,5 +279,85 @@ class home_ScreenState extends State<home_Screen> {
         ],
       ),
     );
+  }
+
+  Future<void> getPlaceDirection() async {
+    var initialPosition = Provider.of<AppData>(context, listen: false).rAddress;
+    var finalPosition = Provider.of<AppData>(context, listen: false).dAddress;
+
+    if (initialPosition == null || finalPosition == null) {
+      print("Error: Invalid initial or final position");
+      return null;
+    }
+
+    var pickLatLang =
+        LatLng(initialPosition.latitude!, initialPosition.longitude!);
+    var dropLatLang = LatLng(finalPosition.latitude!, finalPosition.longitude!);
+
+    var details =
+        await MethodRequest.getLocationDirection(pickLatLang, dropLatLang);
+    PolylinePoints polylinePoints = PolylinePoints();
+    List<PointLatLng> decodePolyPoints =
+        polylinePoints.decodePolyline(details!.encodedPoints);
+
+    if (decodePolyPoints.isNotEmpty) {
+      pLineCoordinates.clear(); // Clear the list before adding new points
+
+      decodePolyPoints.forEach((PointLatLng pointLatLng) {
+        pLineCoordinates
+            .add(LatLng(pointLatLng.latitude, pointLatLng.longitude));
+      });
+
+      print(
+          "Polyline Points: $pLineCoordinates"); // Check if this prints valid coordinates
+
+      polyLineSet.clear();
+
+      polyLineSet.clear();
+      setState(() {
+        Polyline polyLinee = Polyline(
+          polylineId: PolylineId("PolylineID"),
+          jointType: JointType.round,
+          color: Colors.blue.shade900,
+          width: 2,
+          endCap: Cap.squareCap,
+          startCap: Cap.roundCap,
+          points: pLineCoordinates,
+          geodesic: true,
+        );
+        polyLineSet.add(polyLinee);
+      });
+      fitMapToBounds(pLineCoordinates);
+    }
+  }
+
+  void fitMapToBounds(List<LatLng> bounds) {
+    if (userMap != null && bounds.isNotEmpty) {
+      double minLat = bounds[0].latitude;
+      double maxLat = bounds[0].latitude;
+      double minLng = bounds[0].longitude;
+      double maxLng = bounds[0].longitude;
+
+      // Find the minimum and maximum latitude and longitude values
+      for (LatLng point in bounds) {
+        if (point.latitude < minLat) minLat = point.latitude;
+        if (point.latitude > maxLat) maxLat = point.latitude;
+        if (point.longitude < minLng) minLng = point.longitude;
+        if (point.longitude > maxLng) maxLng = point.longitude;
+      }
+
+      // Create the LatLngBounds to fit all the points
+      LatLng southwest = LatLng(minLat, minLng);
+      LatLng northeast = LatLng(maxLat, maxLng);
+      LatLngBounds boundsObject =
+          LatLngBounds(southwest: southwest, northeast: northeast);
+
+      // Set camera position to fit the LatLngBounds with some padding (100)
+      CameraUpdate cameraUpdate =
+          CameraUpdate.newLatLngBounds(boundsObject, 100);
+
+      // Animate the camera to the new position
+      userMap!.animateCamera(cameraUpdate);
+    }
   }
 }

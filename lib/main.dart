@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
 import 'package:ride_sharing/Handler/appData.dart';
+import 'package:ride_sharing/screens/homePage.dart';
 import 'package:ride_sharing/screens/riderLogin.dart';
 import 'package:ride_sharing/screens/search_Screen.dart';
 import 'firebase_options.dart';

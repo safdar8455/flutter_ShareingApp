@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:ride_sharing/Handler/appData.dart';
+import 'package:ride_sharing/Models/direction_Plase.dart';
 import 'package:ride_sharing/Models/riderAddress.dart';
 import 'package:ride_sharing/locationScreens/request_location.dart';
 
@@ -32,5 +34,33 @@ class MethodRequest {
           .updateRiderPickupLocation(riderAddress);
     }
     return desiredAddress;
+  }
+
+  static Future<DirectionPlace?> getLocationDirection(
+      LatLng initialPosition, LatLng finalPosition) async {
+    print(
+        "destination${finalPosition.latitude},${finalPosition.longitude}&origin=${initialPosition.latitude},${initialPosition.longitude}");
+    String directionUrl =
+        "https://maps.googleapis.com/maps/api/directions/json?destination=${finalPosition.latitude},${finalPosition.longitude}&origin=${initialPosition.latitude},${initialPosition.longitude}&key=AIzaSyC0olNwARzr0IQI5gqtb1qxuuPOwfKQNIw";
+
+    try {
+      var response = await RequestAddress.getRequest(directionUrl);
+      if (response == "failed") {
+        return null;
+      }
+
+      DirectionPlace directionPlace = DirectionPlace(
+        distanceText: response["routes"][0]["legs"][0]["distance"]["text"],
+        distanceValue: response["routes"][0]["legs"][0]["distance"]["value"],
+        durationText: response["routes"][0]["legs"][0]["duration"]["text"],
+        durationValue: response["routes"][0]["legs"][0]["duration"]["value"],
+        encodedPoints: response["routes"][0]["overview_polyline"]["points"],
+      );
+
+      return directionPlace;
+    } catch (e) {
+      print("Error fetching direction: $e");
+      return null;
+    }
   }
 }

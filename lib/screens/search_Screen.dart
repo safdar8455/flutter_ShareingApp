@@ -200,7 +200,7 @@ class _SearchScreen extends State<SearchScreen> {
             result["result"]["geometry"]["location"]["lng"];
         Provider.of<AppData>(context, listen: false)
             .updateRiderDropofLocation(riderAddress);
-        print(riderAddress.pName);
+        Navigator.pop(context, "sucessfull");
       } else {
         // Handle API error or no results case
         print('Failed to get predictions');
